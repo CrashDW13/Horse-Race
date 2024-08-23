@@ -25,7 +25,6 @@ public class HorseRacerSequence
         foreach (HorseRaceCheckpoint checkpoint in checkpoints)
         {
             float distance = totalDistance * checkpoint.DistancePercentage;
-            Debug.Log(startingPosition.x + distance);
             sequence.Append(target.transform.DOMoveX(startingPosition.x + distance, totalTime * (checkpoint.Weight / totalWeights)).SetEase(Ease.Linear));
         }
 

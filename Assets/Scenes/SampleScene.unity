@@ -880,7 +880,7 @@ GameObject:
   - component: {fileID: 323724908}
   - component: {fileID: 323724907}
   m_Layer: 0
-  m_Name: FinishLIne
+  m_Name: FinishLine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1656,7 +1656,7 @@ MonoBehaviour:
   _startLine: {fileID: 472213934}
   _finishLine: {fileID: 323724908}
   _laneVerticalGap: 1
-  _resultsObject: {fileID: 770689647}
+  _resultsObject: {fileID: 770689651}
   _results:
   - {fileID: 4837614166424514740}
   - {fileID: 1715378898}
@@ -2293,7 +2293,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _canvasGroup: {fileID: 770689649}
   _distance: 50
-  _time: 0
+  _time: 1
 --- !u!1 &870170772
 GameObject:
   m_ObjectHideFlags: 0
@@ -5125,7 +5125,7 @@ GameObject:
   - component: {fileID: 2066211353}
   - component: {fileID: 2066211352}
   m_Layer: 0
-  m_Name: Graphic
+  m_Name: StartLineGraphic
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

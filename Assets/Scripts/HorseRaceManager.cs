@@ -28,12 +28,14 @@ public class HorseRaceManager : MonoBehaviour
     [SerializeField] private float _laneVerticalGap;
 
     [Header("Results")]
-    [SerializeField] private GameObject _resultsObject;
+    [SerializeField] private HorseRaceResultsContainer _resultsObject;
     [SerializeField] private HorseRaceResults[] _results;
 
     [SerializeField] private List<HorseRacerData> _data;
 
     private HorseRace _race;
+
+    private Task _resultsTask;
     private CancellationTokenSource _tokenSource;
 
     /// <summary>
@@ -104,19 +106,19 @@ public class HorseRaceManager : MonoBehaviour
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
-
     private async void ShowResults()
     {
         _tokenSource = new CancellationTokenSource();
 
         try
         {
-            await Task.Delay((int)(_race.Times[_race.Times.Length - 1] * 1000));
+            _resultsTask = Task.Delay((int)(_race.Times[_race.Times.Length - 1] * 1000));
+            await _resultsTask;
             if (_tokenSource.IsCancellationRequested)
             {
                 return;
             }
-            _resultsObject.SetActive(true);
+            _resultsObject.Activate();
             for (int i = 0; i < _race.Placements.Length; i++)
             {
                 int racerIndex = _race.Placements[i];
