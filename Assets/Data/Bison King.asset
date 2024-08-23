@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5c84a5c9748c1e41b1d3d5ce9ca79c9, type: 3}
+  m_Name: Bison King
+  m_EditorClassIdentifier: 
+  Description:
+    HorseName: Bison King
+    HorseOrigin: Michigan, USA
+    JockeyName: Casey "Cash" Stakk
+    JockeyOrigin: Jackson, Mississippi, USA
+    WinPercentage: 24
+    InTheMoneyPercentage: 42
+    AverageWinningDistance: 7.086
+  Graphics:
+    _sprite: {fileID: 1327686412, guid: 20aeb1eff8b31f14fbaf272ed4c87d1e, type: 3}
+    _controller: {fileID: 9100000, guid: bc272a1d663acf446b471d484145c92f, type: 2}
+    _material: {fileID: -876546973899608171, guid: e9a3265b0ad6300469d1d859ff646508, type: 3}
+    _racerColor: {r: 0.8584906, g: 0.5120679, b: 0.33610713, a: 0}
+    _horseColor: {r: 0.5566038, g: 0.38000247, b: 0.2546725, a: 0}
