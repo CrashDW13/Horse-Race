@@ -14,6 +14,11 @@ public class HorseRacer
     private GameObject _gameObject;
 
     /// <summary>
+    /// The DOTween sequence this racer will follow. 
+    /// </summary>
+    public Sequence @Sequence { get { return _sequence; } }
+
+    /// <summary>
     /// The weight of the racer that decides their odds at winning the race. 
     /// </summary>
     public int Weight { get { return _weight; } }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cysharp.Threading.Tasks;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,10 @@ public class HorseRaceManager : MonoBehaviour
     [SerializeField] private int _maxExtraCheckpoints;
     [SerializeField, Range(0, 1)] private float _checkpointVariation;
     [SerializeField, Range(0, 1)] private float _strengthVariation;
+
+    [Header("Countdown")]
+    [SerializeField] private GameObject _countdownObject;
+    [SerializeField] private TextMeshProUGUI _countdownText;
 
     [Header("GameObject Placement")]
     [SerializeField] private Transform _startLine;
@@ -58,6 +63,7 @@ public class HorseRaceManager : MonoBehaviour
         for (var i = 0; i < _data.Count; i++)
         {
             GameObject racerGameObject = new GameObject();
+            racerGameObject.name = _data[i].Description.HorseName;
             racerGameObject.transform.position = new Vector3(_startLine.position.x, _startLine.position.y - (_laneVerticalGap * i), _startLine.position.z);
             HorseRacer racer = _data[i].CreateRacer(ref racerGameObject);
 
@@ -89,16 +95,18 @@ public class HorseRaceManager : MonoBehaviour
         IRaceTimeGenerator timeGenerator = new HorseRaceTimeGenerator(_racers.Count, _raceTimeWindow.x, _raceTimeWindow.y, _minIntervalPercentage, _maxIntervalPercentage);
         IRaceWeightedPlacement weightedPlacement = new HorseRaceWeightedPlacement(_racers);
         IRaceCheckpointGenerator checkpointGenerator = new HorseRaceCheckpointGenerator(_minExtraCheckpoints, _maxExtraCheckpoints, _checkpointVariation, _strengthVariation);
-        _race = new HorseRace(_racers, timeGenerator, weightedPlacement, checkpointGenerator, _startLine.position, _finishLine.position.x - _startLine.position.x);
+        _race = new HorseRace(_racers, timeGenerator, weightedPlacement, checkpointGenerator, _startLine.position, _finishLine.position.x - _startLine.position.x, _tokenSource);
         _race.Setup();
     }
 
     /// <summary>
     /// Begins the race; tells the GameObjects to start moving.
     /// </summary>
-    public void StartRace()
+    public async UniTask Run()
     {
-        _race.Start();
+        Countdown countdown = new Countdown(new string[] { "3", "2", "1", "GO!" }, 8, 1, _countdownObject, _countdownText, _tokenSource);
+        await countdown.Run();
+        await _race.Run();
         ShowResults();
     }
 
@@ -106,30 +114,14 @@ public class HorseRaceManager : MonoBehaviour
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
-    private async void ShowResults()
+    private void ShowResults()
     {
-        _tokenSource = new CancellationTokenSource();
-
-        try
+        _resultsObject.Activate();
+        for (int i = 0; i < _race.Placements.Length; i++)
         {
-            _resultsTask = Task.Delay((int)(_race.Times[_race.Times.Length - 1] * 1000));
-            await _resultsTask;
-            if (_tokenSource.IsCancellationRequested)
-            {
-                return;
-            }
-            _resultsObject.Activate();
-            for (int i = 0; i < _race.Placements.Length; i++)
-            {
-                int racerIndex = _race.Placements[i];
-                _results[i].SetResults(_data[racerIndex].Graphics.RacerColor, _data[racerIndex].Description.HorseName, _race.Times[i]);
-            }
+            int racerIndex = _race.Placements[i];
+            _results[i].SetResults(_data[racerIndex].Graphics.RacerColor, _data[racerIndex].Description.HorseName, _race.Times[i]);
         }
-        catch (OperationCanceledException)
-        {
-
-        }
-
     }
 
     private void OnDestroy()

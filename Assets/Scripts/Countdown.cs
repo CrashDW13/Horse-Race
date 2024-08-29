@@ -1,5 +1,7 @@
-﻿using DG.Tweening;
+﻿using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using System;
+using System.Threading;
 using TMPro;
 using UnityEngine;
 
@@ -14,6 +16,7 @@ public class Countdown
     private float _time;
     private GameObject _gameObject;
     private TextMeshProUGUI _textMeshPro;
+    private CancellationTokenSource _cancellationTokenSource;
 
     private Vector3 _originalScale;
     private float _originalAlpha;
@@ -23,7 +26,7 @@ public class Countdown
     /// </summary>
     public event Action OnCountdownComplete;
 
-    public Countdown(string[] entries, float scale, float time, GameObject gameObject, TextMeshProUGUI textMeshPro)
+    public Countdown(string[] entries, float scale, float time, GameObject gameObject, TextMeshProUGUI textMeshPro, CancellationTokenSource cts = null)
     {
         _entries = entries;
         _currentIndex = 0;
@@ -31,12 +34,16 @@ public class Countdown
         _time = time;
         _gameObject = gameObject;
         _textMeshPro = textMeshPro;
+        if (cts != null)
+        {
+            _cancellationTokenSource = cts;
+        }
     }
 
     /// <summary>
     /// Generates the a DOTween sequence for the countdown and plays it. 
     /// </summary>
-    public void Start()
+    public async UniTask Run()
     {
         _textMeshPro.text = _entries[0];
         _gameObject.SetActive(true);
@@ -46,17 +53,31 @@ public class Countdown
 
         for (var i = 0; i < _entries.Length - 1; i++)
         {
-            sequence.Append(_gameObject.transform.DOScale(_scale, _time));
-            sequence.Join(_textMeshPro.DOFade(0f, _time));
-            sequence.AppendCallback(Decrement);
+            _ = sequence.Append(_gameObject.transform.DOScale(_scale, _time));
+            _ = sequence.Join(_textMeshPro.DOFade(0f, _time));
+            _ = sequence.AppendCallback(Decrement);
         }
-        sequence.Append(_gameObject.transform.DOScale(_scale, _time));
-        sequence.Join(_textMeshPro.DOFade(0f, _time));
-        sequence.JoinCallback(() => _textMeshPro.text = _entries[_entries.Length - 1]);
-        sequence.JoinCallback(OnCountdownComplete.Invoke);
-        sequence.AppendCallback(Hide);
-        sequence.Play();
 
+        if (_cancellationTokenSource != null)
+        {
+            _ = sequence.WithCancellation(_cancellationTokenSource.Token);
+        }
+
+        await sequence.Play();
+        OnCountdownComplete?.Invoke();
+
+        sequence = DOTween.Sequence(_gameObject);
+        _ = sequence.Append(_gameObject.transform.DOScale(_scale, _time));
+        _ = sequence.Join(_textMeshPro.DOFade(0f, _time));
+        _ = sequence.JoinCallback(() => _textMeshPro.text = _entries[_entries.Length - 1]);
+        _ = sequence.AppendCallback(Hide);
+
+        if (_cancellationTokenSource != null)
+        {
+            _ = sequence.WithCancellation(_cancellationTokenSource.Token);
+        }
+
+        _ = sequence.Play();
     }
 
     private void Hide()

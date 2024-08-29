@@ -26,10 +26,6 @@ public class HorseRacerSelectorUI : MonoBehaviour
     [SerializeField] private float _distance;
     [SerializeField] private float _time;
 
-    [Header("Countdown")]
-    [SerializeField] private GameObject _countdownObject;
-    [SerializeField] private TextMeshProUGUI _countdownText;
-
     private HorseRacerSelector _selector;
     private void Start()
     {
@@ -71,9 +67,7 @@ public class HorseRacerSelectorUI : MonoBehaviour
         _selector.SelectRacer();
         transform.DOMoveY(transform.position.y - _distance, _time);
         _canvasGroup.DOFade(0f, _time / 2f).OnComplete(Hide);
-        Countdown countdown = new Countdown(new string[] {"3", "2", "1", "GO!"}, 8, _time, _countdownObject, _countdownText);
-        countdown.OnCountdownComplete += _raceManager.StartRace;
-        countdown.Start();
+        _ = _raceManager.Run();
     }
 
     private void Hide()

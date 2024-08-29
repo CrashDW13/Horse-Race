@@ -2,6 +2,8 @@
 using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 using DG.Tweening;
+using Cysharp.Threading.Tasks;
+using System.Threading;
 /// <summary>
 /// The <c>HorseRace</c> class represents a predetermined race between one or more instances of the <c>HorseRacer</c> class.
 /// </summary>
@@ -13,6 +15,7 @@ public class HorseRace
     private IRaceCheckpointGenerator _checkpointGenerator;
     private Vector3 _startingPosition;
     private float _raceDistance;
+    private CancellationTokenSource _cancellationTokenSource;
 
     private float[] _times;
     /// <summary>
@@ -34,7 +37,7 @@ public class HorseRace
     /// <param name="checkpointGenerator">An instance of a class that implements <c>IRaceCheckpointGenerator</c> to generate a list of checkpoints for each racer in the race.</param>
     /// <param name="startingPosition">The starting position of the race in world space.</param>
     /// <param name="distance">How far the race should travel in distance along the x-axis.</param>
-    public HorseRace(List<HorseRacer> racers, IRaceTimeGenerator timeGenerator, IRaceWeightedPlacement placement, IRaceCheckpointGenerator checkpointGenerator, Vector3 startingPosition, float distance)
+    public HorseRace(List<HorseRacer> racers, IRaceTimeGenerator timeGenerator, IRaceWeightedPlacement placement, IRaceCheckpointGenerator checkpointGenerator, Vector3 startingPosition, float distance, CancellationTokenSource tokenSource)
     {
         _racers = racers;
         _timeGenerator = timeGenerator;
@@ -42,6 +45,7 @@ public class HorseRace
         _placement = placement;
         _startingPosition = startingPosition;
         _raceDistance = distance;
+        _cancellationTokenSource = tokenSource;
     }
 
     /// <summary>
@@ -58,6 +62,10 @@ public class HorseRace
             List<HorseRaceCheckpoint> checkpoints = _checkpointGenerator.GenerateCheckpoints(i);
             HorseRacerSequence sequence = new HorseRacerSequence();
             Sequence racerSequence = sequence.GenerateSequence(racer.GameObject, checkpoints, _startingPosition, _raceDistance, _times[i]);
+            if (_cancellationTokenSource != null)
+            {
+                racerSequence.WithCancellation(_cancellationTokenSource.Token);
+            }
             racer.SetSequence(racerSequence);
         }
     }
@@ -65,11 +73,14 @@ public class HorseRace
     /// <summary>
     /// Instructs the racers to start moving.
     /// </summary>
-    public void Start()
+    public async UniTask Run()
     {
         foreach (HorseRacer racer in _racers)
         {
             racer.StartRacing();
         }
+
+        HorseRacer lastPlaceRacer = _racers[_placements[_placements.Length - 1]];
+        await lastPlaceRacer.Sequence;
     }
 }
